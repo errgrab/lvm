@@ -15,10 +15,10 @@ ${BIN}: ${@:=.o}
 ${OBJ}:
 
 .o:
-	${CC} -o $@ $< ${SIS_LDFLAGS}
+	${CC} -o $@ $< ${LVM_LDFLAGS}
 
 .c.o:
-	${CC} -c ${SIS_CFLAGS} ${SIS_CPPFLAGS} -o $@ -c $<
+	${CC} -c ${LVM_CFLAGS} ${LVM_CPPFLAGS} -o $@ -c $<
 
 clean:
 	rm -f ${BIN} ${OBJ}
