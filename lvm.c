@@ -1,10 +1,39 @@
 #include <stdio.h>
 #include <errno.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 
 #include "lvm.h"
+
+size_t strlcpy(char *dst, const char *src, size_t siz) {
+	char *d = dst;
+	const char *s = src;
+	size_t n = siz;
+	if (n != 0) while (--n != 0) if ((*d++ = *s++) == '\0') break;
+	if (n == 0) {
+		if (siz != 0) *d = '\0';
+		while (*s++);
+	}
+	return (s - src - 1);
+}
+
+char *eat(char *s, int (*p)(int), int r) {
+	while (*s != '\0' && p((unsigned char)*s) == r) s++;
+	return s;
+}
+
+char *token(char **ps) {
+	char *s = *ps;
+	char *start, *end;
+
+	start = eat(s, isspace, 1);
+	end = eat(start, isspace, 0);
+	if (*end) *end++ = '\0';
+	*ps = eat(end, isspace, 1);
+	return start;
+}
 
 void fatal(const char *fmt, ...) {
 	char buf[1024];
