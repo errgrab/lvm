@@ -1,12 +1,6 @@
-#include <stdio.h>
-#include <errno.h>
-#include <ctype.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
 #include "lvm.h"
 
+/*
 size_t strlcpy(char *dst, const char *src, size_t siz) {
 	char *d = dst;
 	const char *s = src;
@@ -47,39 +41,53 @@ void fatal(const char *fmt, ...) {
 		fprintf(stderr, " %s\n", strerror(errno));
 	exit(1);
 }
+*/
 
-lvm_t *get_lvm() {
-	static lvm_t lvm = {0};
-	return &lvm;
+u0 fatal_arena_full(vm_p vm) {
+	fprintf(stderr, "ERR: arena full\n");
+	vm->arena = arena_del(vm->arena);
+	exit(1);
 }
 
-node_t *new_node(void *val) {
-	node_t *n = calloc(1, sizeof *n);
-	n->val = val;
-	return n;
+cell_p cell_new(vm_p vm) {
+	cell_p c = arena_alloc(vm->arena, sizeof *c, alignof(cell_t));
+	if (!c) fatal_arena_full(vm);
+	return c;
 }
 
-void *del_node(node_t *n) {
-	while (n) {
-		node_t *next = n->next;
-		free(n);
-		n = next;
-	}
+cell_p mk_nil(vm_p vm) {
+	(u0)vm;
 	return NULL;
 }
 
-node_t *append(node_t *dst, node_t *src) {
-	node_t *d = dst;
-	while (d->next) d = d->next;
-	d->next = src;
-	return dst;
+cell_p mk_num(vm_p vm, i32 num) {
+	cell_p c = cell_new(vm);
+	c->tag = T_NUM; c->val.num = num;
+	return c;
 }
 
-node_t *prepend(node_t *dst, node_t *src) {
-	src->next = dst;
-	return src;
+cell_p mk_chr(vm_p vm, chr_t chr) {
+	cell_p c = cell_new(vm);
+	c->tag = T_CHR; c->val.chr = chr;
+	return c;
 }
 
-int main(void) {
+cell_p mk_str(vm_p vm, const chr_p s) {
+	usize len = strlen(s);
+	chr_p buf = arena_alloc(vm->arena, len + 1, alignof(chr_t));
+	if (!buf) fatal_arena_full(vm);
+	memcpy(buf, s, len + 1);
+	cell_p c = cell_new(vm);
+	c->tag = T_STR; c->val.str.buf = buf; c->val.str.len = len;
+	return c;
+}
+
+cell_p mk_list(vm_p vm, cell_p head, cell_p tail) {
+	cell_p c = cell_new(vm);
+	c->tag = T_LIST; c->val.list.head = head; c->val.list.tail = tail;
+	return c;
+}
+
+int main(u0) {
 	return 0;
 }
