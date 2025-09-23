@@ -11,10 +11,10 @@ arena_p arena_new(usize cap) {
 }
 
 arena_p arena_del(arena_p a) {
-	if (!a) return (arena_p)NULL;
+	if (!a) return NULL;
 	free(a->base);
 	free(a);
-	return (arena_p)NULL;
+	return NULL;
 }
 
 u0p arena_alloc(arena_p a, usize n, usize align) {
